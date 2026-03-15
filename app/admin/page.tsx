@@ -22,7 +22,7 @@ import {
 
 import { Pencil } from "lucide-react"
 
-type Category = "business" | "gigs" | "tech"
+type Category = "business" | "gigs" | "tech" | "plugs"
 
 type Plan = {
   id: string
@@ -30,6 +30,7 @@ type Plan = {
   price: number
   category: Category
   fileKey: string
+  bestSelling?: boolean
   createdAt?: any
 }
 
@@ -117,6 +118,7 @@ export default function AdminPage() {
       price: newPrice,
       category: newCategory,
       fileKey: data.key,
+      bestSelling: false,
       createdAt: serverTimestamp(),
     })
 
@@ -412,6 +414,7 @@ export default function AdminPage() {
               <option value="business">Business</option>
               <option value="gigs">Gigs</option>
               <option value="tech">Tech</option>
+              <option value="plugs">Plugs</option>
             </select>
           </div>
 
@@ -473,6 +476,7 @@ export default function AdminPage() {
                 <th className="p-3">Price</th>
                 <th className="p-3">Category</th>
                 <th className="p-3">Actions</th>
+                <th className="p-3">Best Seller</th>
               </tr>
             </thead>
 
@@ -543,6 +547,30 @@ export default function AdminPage() {
                     ) : (
                       plan.category
                     )}
+                  </td>
+
+                  <td className="p-3">
+                    <input
+                      type="checkbox"
+                      checked={plan.bestSelling || false}
+                      onChange={async (e) => {
+
+                        const value = e.target.checked
+
+                        await updateDoc(doc(db, "plans", plan.id), {
+                          bestSelling: value,
+                        })
+
+                        setPlans(prev =>
+                          prev.map(p =>
+                            p.id === plan.id
+                              ? { ...p, bestSelling: value }
+                              : p
+                          )
+                        )
+
+                      }}
+                    />
                   </td>
 
                   <td className="p-3 space-x-3">

@@ -11,7 +11,8 @@ type Plan = {
   price: number
   fileKey: string
   createdAt: string
-  category: "business" | "gigs" | "tech"
+  category: "business" | "gigs" | "tech" | "plugs"
+  bestSelling?: boolean
 }
 
 type Bundle = {
@@ -28,7 +29,7 @@ export default function HomePage() {
   const [bundle, setBundle] = useState<Bundle | null>(null)
 
   const [activeCategory, setActiveCategory] =
-    useState<"business" | "gigs" | "tech">("business")
+    useState<"best" | "business" | "gigs" | "tech" | "plugs">("best")
 
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState<SortOption>("newest")
@@ -56,6 +57,7 @@ export default function HomePage() {
           price: data.price,
           fileKey: data.fileKey,
           category: data.category || "business",
+          bestSelling: data.bestSelling || false,
           createdAt:
             createdAt?.toDate?.().toISOString() ||
             new Date().toISOString(),
@@ -87,11 +89,15 @@ export default function HomePage() {
 
   let filteredPlans = plans.filter((plan) => {
 
-    const matchesCategory = plan.category === activeCategory
-
     const matchesSearch = plan.title
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
+
+    if (activeCategory === "best") {
+      return plan.bestSelling && matchesSearch
+    }
+
+    const matchesCategory = plan.category === activeCategory
 
     return matchesCategory && matchesSearch
 
@@ -134,13 +140,11 @@ export default function HomePage() {
 
         </section>
 
-
         {/* PURCHASE DISCLAIMER */}
 
         <div className="max-w-xl mx-auto mb-10 bg-yellow-50 border border-yellow-300 text-yellow-900 text-xs rounded-xl p-4 text-center shadow-sm">
           ⚠️ Download links expire after 24hrs of purchase
         </div>
-
 
         {/* SEARCH */}
 
@@ -156,7 +160,6 @@ export default function HomePage() {
 
         </div>
 
-
         {/* CATEGORY */}
 
         <div className="flex justify-center mb-8">
@@ -164,16 +167,18 @@ export default function HomePage() {
           <div className="flex gap-3 p-1 bg-white rounded-full shadow-sm border border-indigo-200">
 
             {[
+              { key: "best", label: "Best Selling" },
               { key: "business", label: "Business Plans" },
               { key: "gigs", label: "Online Gigs" },
               { key: "tech", label: "Tech & Web Dev" },
+              { key: "plugs", label: "Plugs" },
             ].map((cat) => (
 
               <button
                 key={cat.key}
                 onClick={() =>
                   setActiveCategory(
-                    cat.key as "business" | "gigs" | "tech"
+                    cat.key as any
                   )
                 }
                 className={`px-5 py-2 text-xs font-semibold rounded-full transition ${
@@ -190,7 +195,6 @@ export default function HomePage() {
           </div>
 
         </div>
-
 
         {/* SORT + LAYOUT */}
 
